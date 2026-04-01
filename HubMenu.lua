@@ -1,37 +1,39 @@
-local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Create the UI
+-- 1. Create the UI
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "FadeGui"
+screenGui.Name = "MyMenu"
+screenGui.ResetOnSpawn = false -- Keeps the menu if you die
 screenGui.Parent = playerGui
 
-local textLabel = Instance.new("TextLabel")
-textLabel.Text = "Hello"
-textLabel.Size = UDim2.new(0, 200, 0, 50)
-textLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-textLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
-textLabel.BackgroundTransparency = 1
-textLabel.TextColor3 = Color3.new(1, 1, 1)
-textLabel.TextSize = 40
-textLabel.Parent = screenGui
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 300, 0, 400)
+mainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Dark sleek UI
+mainFrame.BorderSizePixel = 0
+mainFrame.Visible = true -- Starts visible
+mainFrame.Parent = screenGui
 
--- --- THE FADE LOGIC ---
+-- 2. Add a title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Text = "Hub Menu [L-CTRL]"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.BackgroundTransparency = 1
+title.TextSize = 20
+title.Parent = mainFrame
 
--- 1. Setup the Tween settings (2 seconds long, smooth easing)
-local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Linear)
+-- 3. The Toggle Logic
+local toggleKey = Enum.KeyCode.LeftControl -- Change this to any key (e.g., Enum.KeyCode.RightShift)
 
--- 2. Define what property we want to change (TextTransparency to 1)
-local targetProperties = {TextTransparency = 1}
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    -- gameProcessed is true if the player is typing in chat
+    if gameProcessed then return end
 
--- 3. Create and Play the animation
-local fadeTween = TweenService:Create(textLabel, tweenInfo, targetProperties)
-
-task.wait(2) -- Let the player read "Hello" for 2 seconds
-fadeTween:Play() -- Start the fade
-
--- Optional: Cleanup once the fade is done
-fadeTween.Completed:Connect(function()
-    screenGui:Destroy()
+    if input.KeyCode == toggleKey then
+        mainFrame.Visible = not mainFrame.Visible
+        print("Menu Toggled: " .. tostring(mainFrame.Visible))
+    end
 end)
