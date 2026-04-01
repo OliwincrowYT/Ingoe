@@ -122,6 +122,14 @@ saveBtn.MouseButton1Click:Connect(function()
 end)
 
 unloadBtn.MouseButton1Click:Connect(function()
+    -- 1. Reset player speed to normal
+    local hum = player.Character and player.Character:FindFirstChild("Humanoid")
+    if hum then hum.WalkSpeed = 16 end
+
+    -- 2. Stop the Inf Jump listener (optional but cleaner)
+    settings.InfJump = false
+
+    -- 3. Boom, gone.
     screenGui:Destroy()
 end)
 
