@@ -72,3 +72,13 @@ UserInputService.InputBegan:Connect(function(input, gpe)
         mainFrame.Visible = not mainFrame.Visible
     end
 end)
+
+local StarterGui = game:GetService("StarterGui")
+
+-- Send a notification that the script has loaded
+StarterGui:SetCore("SendNotification", {
+    Title = "Ingoe Hub",
+    Text = "Successfully loaded! Press L-CTRL to toggle.",
+    Icon = "rbxassetid://6031763426", -- A little gear icon
+    Duration = 5
+})
