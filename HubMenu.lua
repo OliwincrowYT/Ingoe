@@ -1,37 +1,26 @@
-﻿local TweenService = game:GetService("TweenService")
+﻿-- Define the Player and their UI container
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Create the UI
+-- Create the ScreenGui
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "FadeGui"
+screenGui.Name = "HelloGui"
 screenGui.Parent = playerGui
 
+-- Create the TextLabel
 local textLabel = Instance.new("TextLabel")
+textLabel.Name = "GreetingLabel"
 textLabel.Text = "Hello"
-textLabel.Size = UDim2.new(0, 200, 0, 50)
-textLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-textLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
-textLabel.BackgroundTransparency = 1
-textLabel.TextColor3 = Color3.new(1, 1, 1)
+textLabel.Size = UDim2.new(0, 200, 0, 50) -- Width: 200px, Height: 50px
+textLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
+textLabel.BackgroundTransparency = 1 -- Transparent background
+textLabel.Font = Enum.Font.SourceSansBold
 textLabel.TextSize = 40
+
+-- Center the label
+-- AnchorPoint (0.5, 0.5) puts the "handle" in the middle of the label
+textLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+-- Position (0.5, 0, 0.5, 0) puts that handle in the middle of the screen
+textLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+
 textLabel.Parent = screenGui
-
--- --- THE FADE LOGIC ---
-
--- 1. Setup the Tween settings (2 seconds long, smooth easing)
-local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Linear)
-
--- 2. Define what property we want to change (TextTransparency to 1)
-local targetProperties = {TextTransparency = 1}
-
--- 3. Create and Play the animation
-local fadeTween = TweenService:Create(textLabel, tweenInfo, targetProperties)
-
-task.wait(2) -- Let the player read "Hello" for 2 seconds
-fadeTween:Play() -- Start the fade
-
--- Optional: Cleanup once the fade is done
-fadeTween.Completed:Connect(function()
-    screenGui:Destroy()
-end)
