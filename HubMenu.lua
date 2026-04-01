@@ -113,29 +113,55 @@ end)
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
 
+local function isVisible(targetPart)
+    local char = player.Character
+    if not char then return false end
+
+    -- Parameters to ignore yourself and the target's own character
+    local params = RaycastParams.new()
+    params.FilterDescendantsInstances = {char, targetPart.Parent}
+    params.FilterType = Enum.RaycastFilterType.Exclude
+
+    local direction = targetPart.Position - Camera.CFrame.Position
+    local result = workspace:Raycast(Camera.CFrame.Position, direction, params)
+
+    -- If result is nil, nothing was in the way
+    return result == nil
+
 -- Function to get the closest player
-local function getClosestPlayer()
-    local closestPlayer = nil
-    local shortestDistance = math.huge
+    local function getClosestPlayer()
+        local closestPlayer = nil
+        local shortestDistance = math.huge
 
-    for _, v in pairs(game.Players:GetPlayers()) do
-        if v ~= player and v.Character and v.Character:FindFirstChild("HumanoidRootPart") and v.Character:FindFirstChild("Humanoid").Health > 0 then
+        for _, v in pairs(game.Players:GetPlayers()) do
+            if v ~= player and v.Character and v.Character:FindFirstChild("Head") then
+                local head = v.Character.Head
+                local health = v.Character:FindFirstChildOfClass("Humanoid") and v.Character:FindFirstChildOfClass("Humanoid").Health or 0
 
-            -- Team Check Logic
-            if teamCheckEnabled and v.Team == player.Team then end
+                if health <= 0 then end
 
-            local pos, onScreen = Camera:WorldToViewportPoint(v.Character.HumanoidRootPart.Position)
-            if onScreen then
-                local distance = (Vector2.new(pos.X, pos.Y) - Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)).Magnitude
-                if distance < shortestDistance then
-                    closestPlayer = v
-                    shortestDistance = distance
+                -- 1. Team Check (Arsenal System)
+                if teamCheckEnabled and v.Team == player.Team then
+                    
+                end
+
+                -- 2. On-Screen Check
+                local pos, onScreen = Camera:WorldToViewportPoint(head.Position)
+                if onScreen then
+                    -- 3. Wall Check (Visibility)
+                    if isVisible(head) then
+                        local distance = (Vector2.new(pos.X, pos.Y) - Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)).Magnitude
+
+                        if distance < shortestDistance then
+                            closestPlayer = v
+                            shortestDistance = distance
+                        end
+                    end
                 end
             end
         end
+        return closestPlayer
     end
-    return closestPlayer
-end
 
 -- The Heartbeat Loop (Runs every frame)
 RunService.RenderStepped:Connect(function()
@@ -211,4 +237,4 @@ end)
 
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
-end)
+end) end
