@@ -36,7 +36,13 @@ screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 300, 0, 420)
+-- Update Frame Size to fit new buttons
+mainFrame.Size = UDim2.new(0, 300, 0, 500)
+
+-- Add the new toggles to your UI ELEMENTS section
+
+-- Move UNLOAD down to the very bottom
+
 mainFrame.Position = UDim2.new(0.5, -150, 0.5, -210)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 mainFrame.BorderSizePixel = 0
@@ -71,8 +77,12 @@ local jumpBtn = createButton("Inf Jump: " .. (settings.InfJump and "ON" or "OFF"
 local keybindBtn = createButton("Toggle Key: " .. settings.ToggleKey, UDim2.new(0.1, 0, 0.41, 0), Color3.fromRGB(70, 70, 50))
 local saveBtn = createButton("SAVE PREFS", UDim2.new(0.1, 0, 0.54, 0), Color3.fromRGB(40, 40, 40)) -- Adjusted position
 local dexBtn = createButton("Open Dex", UDim2.new(0.1, 0, 0.67, 0), Color3.fromRGB(50, 50, 50)) -- Adjusted position
-local unloadBtn = createButton("UNLOAD", UDim2.new(0.1, 0, 0.85, 0), Color3.fromRGB(100, 40, 40))
+local unloadBtn = createButton("UNLOAD", UDim2.new(0.1, 0, 0.93, 0), Color3.fromRGB(100, 40, 40))
+local aimbotEnabled = false
+local teamCheckEnabled = false
 
+local aimBtn = createButton("Aimbot: OFF", UDim2.new(0.1, 0, 0.75, 0), Color3.fromRGB(80, 50, 50))
+local teamBtn = createButton("Team Check: OFF", UDim2.new(0.1, 0, 0.85, 0), Color3.fromRGB(50, 50, 80))
 -- --- LOGIC ---
 
 speedBtn.MouseButton1Click:Connect(function()
@@ -98,6 +108,55 @@ local listeningForKey = false
 keybindBtn.MouseButton1Click:Connect(function()
     listeningForKey = true
     keybindBtn.Text = "..."
+end)
+
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+
+-- Function to get the closest player
+local function getClosestPlayer()
+    local closestPlayer = nil
+    local shortestDistance = math.huge
+
+    for _, v in pairs(game.Players:GetPlayers()) do
+        if v ~= player and v.Character and v.Character:FindFirstChild("HumanoidRootPart") and v.Character:FindFirstChild("Humanoid").Health > 0 then
+
+            -- Team Check Logic
+            if teamCheckEnabled and v.Team == player.Team then end
+
+            local pos, onScreen = Camera:WorldToViewportPoint(v.Character.HumanoidRootPart.Position)
+            if onScreen then
+                local distance = (Vector2.new(pos.X, pos.Y) - Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)).Magnitude
+                if distance < shortestDistance then
+                    closestPlayer = v
+                    shortestDistance = distance
+                end
+            end
+        end
+    end
+    return closestPlayer
+end
+
+-- The Heartbeat Loop (Runs every frame)
+RunService.RenderStepped:Connect(function()
+    if aimbotEnabled then
+        local target = getClosestPlayer()
+        if target and target.Character then
+            -- Smoothly move camera toward target's head
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.Head.Position)
+        end
+    end
+end)
+
+-- Button Logic
+aimBtn.MouseButton1Click:Connect(function()
+    aimbotEnabled = not aimbotEnabled
+    aimBtn.Text = "Aimbot: " .. (aimbotEnabled and "ON" or "OFF")
+end)
+
+teamBtn.MouseButton1Click:Connect(function()
+    teamCheckEnabled = not teamCheckEnabled
+    teamBtn.Text = "Team Check: " .. (teamCheckEnabled and "ON" or "OFF")
 end)
 
 dexBtn.MouseButton1Click:Connect(function()
