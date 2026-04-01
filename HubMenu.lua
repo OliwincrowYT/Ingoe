@@ -1,5 +1,5 @@
 local UserInputService = game:GetService("UserInputService")
-local HttpService = game:GetService("HttpService")
+local HttpService = game:GetService("HttpService") -- Fixed: Removed the stray \
 local player = game.Players.LocalPlayer
 
 -- --- CONFIG & STATE ---
@@ -27,7 +27,6 @@ local function loadSettings()
     end
 end
 
--- Load settings immediately on execution
 loadSettings()
 
 -- --- UI SETUP ---
@@ -37,7 +36,7 @@ screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 300, 0, 420) -- Made taller for new buttons
+mainFrame.Size = UDim2.new(0, 300, 0, 420)
 mainFrame.Position = UDim2.new(0.5, -150, 0.5, -210)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 mainFrame.BorderSizePixel = 0
@@ -66,16 +65,16 @@ local function createButton(text, pos, color)
     return btn
 end
 
+-- Fixed Spacing Logic
 local speedBtn = createButton("Speed: " .. settings.Speed, UDim2.new(0.1, 0, 0.15, 0), Color3.fromRGB(50, 50, 70))
-local jumpBtn = createButton("Inf Jump: " .. (settings.InfJump and "ON" or "OFF"), UDim2.new(0.1, 0, 0.3, 0), Color3.fromRGB(50, 70, 50))
-local keybindBtn = createButton("Toggle Key: " .. settings.ToggleKey, UDim2.new(0.1, 0, 0.45, 0), Color3.fromRGB(70, 70, 50))
-local dexBtn = createButton("Open Dex Explorer", Color3.fromRGB(80, 51, 120))
-local saveBtn = createButton("SAVE PREFS", UDim2.new(0.1, 0, 0.65, 0), Color3.fromRGB(40, 40, 40))
+local jumpBtn = createButton("Inf Jump: " .. (settings.InfJump and "ON" or "OFF"), UDim2.new(0.1, 0, 0.28, 0), Color3.fromRGB(50, 70, 50))
+local keybindBtn = createButton("Toggle Key: " .. settings.ToggleKey, UDim2.new(0.1, 0, 0.41, 0), Color3.fromRGB(70, 70, 50))
+local saveBtn = createButton("SAVE PREFS", UDim2.new(0.1, 0, 0.54, 0), Color3.fromRGB(40, 40, 40)) -- Adjusted position
+local dexBtn = createButton("Open Dex", UDim2.new(0.1, 0, 0.67, 0), Color3.fromRGB(50, 50, 50)) -- Adjusted position
 local unloadBtn = createButton("UNLOAD", UDim2.new(0.1, 0, 0.85, 0), Color3.fromRGB(100, 40, 40))
 
 -- --- LOGIC ---
 
--- 1. Speed
 speedBtn.MouseButton1Click:Connect(function()
     settings.Speed = (settings.Speed == 16) and 100 or 16
     local hum = player.Character and player.Character:FindFirstChild("Humanoid")
@@ -83,7 +82,6 @@ speedBtn.MouseButton1Click:Connect(function()
     speedBtn.Text = "Speed: " .. settings.Speed
 end)
 
--- 2. Infinite Jump
 jumpBtn.MouseButton1Click:Connect(function()
     settings.InfJump = not settings.InfJump
     jumpBtn.Text = "Inf Jump: " .. (settings.InfJump and "ON" or "OFF")
@@ -96,7 +94,6 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
--- 3. Change Toggle Key
 local listeningForKey = false
 keybindBtn.MouseButton1Click:Connect(function()
     listeningForKey = true
@@ -104,7 +101,7 @@ keybindBtn.MouseButton1Click:Connect(function()
 end)
 
 dexBtn.MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("https://obj.wearedevs.net/2/scripts/Dex%20Explorer.lua"))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))() -- Using a more stable Dex link
 end)
 
 UserInputService.InputBegan:Connect(function(input)
@@ -117,7 +114,6 @@ UserInputService.InputBegan:Connect(function(input)
     end
 end)
 
--- 4. Save Button
 saveBtn.MouseButton1Click:Connect(function()
     saveSettings()
     saveBtn.Text = "SAVED!"
@@ -125,12 +121,11 @@ saveBtn.MouseButton1Click:Connect(function()
     saveBtn.Text = "SAVE PREFS"
 end)
 
--- 5. Unload
 unloadBtn.MouseButton1Click:Connect(function()
     screenGui:Destroy()
 end)
 
--- Draggable Logic (Title Bar)
+-- Draggable Logic
 local dragging, dragStart, startPos
 titleBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
