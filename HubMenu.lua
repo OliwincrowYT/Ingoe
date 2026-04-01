@@ -1,49 +1,118 @@
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
 local player = game.Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
 
--- 1. Main UI Setup
+-- --- CONFIG & STATE ---
+local HubName = "Ingoe Hub"
+local Version = "1.1.0"
+local isUnloaded = false
+local speedEnabled = false
+local infJumpEnabled = false
+
+-- Store connections here so we can disconnect them on Unload
+local connections = {}
+
+-- --- UI CONSTRUCTION ---
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "IngoeHub"
+screenGui.Name = "Ingoe_Internal"
 screenGui.ResetOnSpawn = false
-screenGui.Parent = playerGui
+screenGui.Parent = player:WaitForChild("PlayerGui")
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 300, 0, 400)
-mainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
+mainFrame.Size = UDim2.new(0, 300, 0, 350)
+mainFrame.Position = UDim2.new(0.5, -150, 0.5, -175)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 mainFrame.BorderSizePixel = 0
 mainFrame.Parent = screenGui
 
--- 2. Title Bar (The handle for dragging)
 local titleBar = Instance.new("TextLabel")
 titleBar.Size = UDim2.new(1, 0, 0, 40)
-titleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-titleBar.Text = "Ingoe Hub"
+titleBar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+titleBar.Text = "  " .. HubName .. " v" .. Version
 titleBar.TextColor3 = Color3.new(1, 1, 1)
 titleBar.TextXAlignment = Enum.TextXAlignment.Left
-titleBar.BorderSizePixel = 0
+titleBar.Font = Enum.Font.SourceSansBold
+titleBar.TextSize = 18
 titleBar.Parent = mainFrame
 
--- 3. Add a Sample Button
-local testButton = Instance.new("TextButton")
-testButton.Size = UDim2.new(0.8, 0, 0, 40)
-testButton.Position = UDim2.new(0.1, 0, 0.2, 0)
-testButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-testButton.Text = "Click Me"
-testButton.TextColor3 = Color3.new(1, 1, 1)
-testButton.Parent = mainFrame
+-- --- BUTTON FACTORY ---
+local function createButton(text, pos, color)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.8, 0, 0, 40)
+    btn.Position = pos
+    btn.BackgroundColor3 = color
+    btn.Text = text
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.SourceSans
+    btn.TextSize = 16
+    btn.Parent = mainFrame
 
-testButton.MouseButton1Click:Connect(function()
-    print("Button clicked by " .. player.Name)
-    testButton.Text = "Success!"
-    task.wait(1)
-    testButton.Text = "Click Me"
+    -- Round the corners slightly
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = btn
+
+    return btn
+end
+
+local speedBtn = createButton("Speed: Normal", UDim2.new(0.1, 0, 0.2, 0), Color3.fromRGB(50, 50, 70))
+local jumpBtn = createButton("Inf Jump: OFF", UDim2.new(0.1, 0, 0.4, 0), Color3.fromRGB(50, 70, 50))
+local unloadBtn = createButton("UNLOAD HUB", UDim2.new(0.1, 0, 0.8, 0), Color3.fromRGB(100, 40, 40))
+
+-- --- FEATURES ---
+
+-- 1. Speed
+speedBtn.MouseButton1Click:Connect(function()
+    if isUnloaded then return end
+    speedEnabled = not speedEnabled
+    local hum = player.Character and player.Character:FindFirstChild("Humanoid")
+    if hum then
+        hum.WalkSpeed = speedEnabled and 100 or 16
+    end
+    speedBtn.Text = speedEnabled and "Speed: FAST" or "Speed: Normal"
 end)
 
--- --- ADVANCED LOGIC ---
+-- 2. Inf Jump
+jumpBtn.MouseButton1Click:Connect(function()
+    if isUnloaded then return end
+    infJumpEnabled = not infJumpEnabled
+    jumpBtn.Text = infJumpEnabled and "Inf Jump: ON" or "Inf Jump: OFF"
+end)
 
--- Dragging Logic
+local jumpConn = UserInputService.JumpRequest:Connect(function()
+    if infJumpEnabled and player.Character then
+        local hum = player.Character:FindFirstChildOfClass("Humanoid")
+        if hum then hum:ChangeState("Jumping") end
+    end
+end)
+table.insert(connections, jumpConn)
+
+-- --- UNLOAD LOGIC ---
+unloadBtn.MouseButton1Click:Connect(function()
+    isUnloaded = true
+
+    -- Reset Character
+    local hum = player.Character and player.Character:FindFirstChild("Humanoid")
+    if hum then hum.WalkSpeed = 16 end
+
+    -- Disconnect all events
+    for _, conn in pairs(connections) do
+        conn:Disconnect()
+    end
+
+    -- Destroy UI
+    screenGui:Destroy()
+
+    print("Hub Unloaded Successfully.")
+    StarterGui:SetCore("SendNotification", {
+        Title = HubName,
+        Text = "Hub has been unloaded.",
+        Duration = 3
+    })
+end)
+
+-- --- DRAGGING & TOGGLE ---
 local dragging, dragInput, dragStart, startPos
 titleBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -53,12 +122,13 @@ titleBar.InputBegan:Connect(function(input)
     end
 end)
 
-UserInputService.InputChanged:Connect(function(input)
+local dragConn = UserInputService.InputChanged:Connect(function(input)
     if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
         local delta = input.Position - dragStart
         mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
 end)
+table.insert(connections, dragConn)
 
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -66,19 +136,16 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- Toggle Logic (L-CTRL)
-UserInputService.InputBegan:Connect(function(input, gpe)
+local toggleConn = UserInputService.InputBegan:Connect(function(input, gpe)
     if not gpe and input.KeyCode == Enum.KeyCode.LeftControl then
         mainFrame.Visible = not mainFrame.Visible
     end
 end)
+table.insert(connections, toggleConn)
 
-local StarterGui = game:GetService("StarterGui")
-
--- Send a notification that the script has loaded
+-- --- LOAD NOTIFICATION ---
 StarterGui:SetCore("SendNotification", {
-    Title = "Ingoe Hub",
-    Text = "Successfully loaded! Press L-CTRL to toggle.",
-    Icon = "rbxassetid://6031763426", -- A little gear icon
+    Title = HubName,
+    Text = "Ready! L-CTRL to Toggle.",
     Duration = 5
 })
