@@ -9,6 +9,7 @@ local Version = "1.1.0"
 local isUnloaded = false
 local speedEnabled = false
 local infJumpEnabled = false
+local ToggleKey = Enum.KeyCode.LeftControl
 
 -- Store connections here so we can disconnect them on Unload
 local connections = {}
@@ -137,7 +138,7 @@ UserInputService.InputEnded:Connect(function(input)
 end)
 
 local toggleConn = UserInputService.InputBegan:Connect(function(input, gpe)
-    if not gpe and input.KeyCode == Enum.KeyCode.LeftControl then
+    if not gpe and input.KeyCode == ToggleKey then
         mainFrame.Visible = not mainFrame.Visible
     end
 end)
@@ -146,6 +147,6 @@ table.insert(connections, toggleConn)
 -- --- LOAD NOTIFICATION ---
 StarterGui:SetCore("SendNotification", {
     Title = HubName,
-    Text = "Ready! L-CTRL to Toggle.",
+    Text = "Ready! " + ToggleKey + " to Toggle.",
     Duration = 5
 })
