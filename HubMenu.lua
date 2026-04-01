@@ -69,6 +69,7 @@ end
 local speedBtn = createButton("Speed: " .. settings.Speed, UDim2.new(0.1, 0, 0.15, 0), Color3.fromRGB(50, 50, 70))
 local jumpBtn = createButton("Inf Jump: " .. (settings.InfJump and "ON" or "OFF"), UDim2.new(0.1, 0, 0.3, 0), Color3.fromRGB(50, 70, 50))
 local keybindBtn = createButton("Toggle Key: " .. settings.ToggleKey, UDim2.new(0.1, 0, 0.45, 0), Color3.fromRGB(70, 70, 50))
+local dexBtn = createButton("Open Dex Explorer", Color3.fromRGB(80, 50, 120))
 local saveBtn = createButton("SAVE PREFS", UDim2.new(0.1, 0, 0.65, 0), Color3.fromRGB(40, 40, 40))
 local unloadBtn = createButton("UNLOAD", UDim2.new(0.1, 0, 0.85, 0), Color3.fromRGB(100, 40, 40))
 
@@ -100,6 +101,10 @@ local listeningForKey = false
 keybindBtn.MouseButton1Click:Connect(function()
     listeningForKey = true
     keybindBtn.Text = "..."
+end)
+
+dexBtn.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://obj.wearedevs.net/2/scripts/Dex%20Explorer.lua"))()
 end)
 
 UserInputService.InputBegan:Connect(function(input)
