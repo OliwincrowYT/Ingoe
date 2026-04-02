@@ -82,6 +82,25 @@ local unloadBtn = createButton("UNLOAD", UDim2.new(0.1, 0, 0.88, 0), Color3.from
 
 -- --- AIMBOT CORE LOGIC ---
 
+-- Arsenal-specific Team Check
+local function isEnemy(targetPlayer)
+    if not teamCheckEnabled then return true end
+
+    -- Check 1: Standard Team Color (Works for most Arsenal modes)
+    if targetPlayer.TeamColor ~= player.TeamColor then
+        return true
+    end
+
+    -- Check 2: FFA Mode (If the game mode is Free For All)
+    -- In FFA, everyone is an enemy regardless of team.
+    -- You can add a toggle for this or a check for the 'Neutral' team.
+    if targetPlayer.Neutral then
+        return true
+    end
+
+    return false
+end
+
 local function isVisible(targetPart)
     if not wallCheckEnabled then return true end
     local char = player.Character
@@ -108,7 +127,7 @@ local function getClosestPlayer()
 
             if hum and hum.Health > 0 then
                 -- Team Check
-                if teamCheckEnabled and v.Team == player.Team then end
+                if not isEnemy(v) then end
 
                 -- Screen Check
                 local pos, onScreen = Camera:WorldToViewportPoint(head.Position)
