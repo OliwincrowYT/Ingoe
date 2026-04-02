@@ -121,17 +121,6 @@ local dexBtn      = createButton("Open Dex", Color3.fromRGB(50, 50, 50), 7)
 local saveBtn     = createButton("SAVE PREFS", Color3.fromRGB(40, 40, 40), 8)
 local unloadBtn   = createButton("UNLOAD", Color3.fromRGB(100, 40, 40), 9)
 
--- Create the Buttons inside the mainFrame
-local speedBtn = createButton("Speed: " .. settings.Speed, UDim2.new(0.1, 0, 0.12, 0), Color3.fromRGB(50, 50, 70))
-local jumpBtn = createButton("Inf Jump: " .. (settings.InfJump and "ON" or "OFF"), UDim2.new(0.1, 0, 0.21, 0), Color3.fromRGB(50, 70, 50))
-local keybindBtn = createButton("Toggle Key: " .. settings.ToggleKey, UDim2.new(0.1, 0, 0.30, 0), Color3.fromRGB(70, 70, 50))
-local aimBtn = createButton("Aimbot: OFF", UDim2.new(0.1, 0, 0.39, 0), Color3.fromRGB(80, 50, 50))
-local teamBtn = createButton("Team Check: OFF", UDim2.new(0.1, 0, 0.48, 0), Color3.fromRGB(50, 50, 80))
-local wallBtn = createButton("Wall Check: OFF", UDim2.new(0.1, 0, 0.57, 0), Color3.fromRGB(60, 60, 60))
-local dexBtn = createButton("Open Dex", UDim2.new(0.1, 0, 0.66, 0), Color3.fromRGB(50, 50, 50))
-local saveBtn = createButton("SAVE PREFS", UDim2.new(0.1, 0, 0.75, 0), Color3.fromRGB(40, 40, 40))
-local unloadBtn = createButton("UNLOAD", UDim2.new(0.1, 0, 0.88, 0), Color3.fromRGB(100, 40, 40))
-
 -- --- KEY LOGIC ---
 local function unlockHub()
     keyFrame:Destroy() -- Removes key screen entirely
