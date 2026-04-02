@@ -64,48 +64,62 @@ titleBar.TextXAlignment = Enum.TextXAlignment.Left
 titleBar.Parent = mainFrame
 
 -- KEY SYSTEM FRAME
-local keyFrame = Instance.new("Frame")
-keyFrame.Size = UDim2.new(0, 300, 0, 180)
-keyFrame.Position = UDim2.new(0.5, -150, 0.5, -90)
-keyFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-keyFrame.BorderSizePixel = 0
-keyFrame.Parent = screenGui
+-- --- UI SETUP ---
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "Ingoe_Internal"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
 
-local keyCorner = Instance.new("UICorner")
-keyCorner.CornerRadius = UDim.new(0, 8)
-keyCorner.Parent = keyFrame
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 300, 0, 520)
+mainFrame.Position = UDim2.new(0.5, -150, 0.5, -260)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+mainFrame.Visible = false
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = screenGui
 
-local keyBox = Instance.new("TextBox")
-keyBox.Size = UDim2.new(0.8, 0, 0, 40)
-keyBox.Position = UDim2.new(0.1, 0, 0.3, 0)
-keyBox.PlaceholderText = "Enter Key... ;)"
-keyBox.Text = ""
-keyBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-keyBox.TextColor3 = Color3.new(1, 1, 1)
-keyBox.Parent = keyFrame
+-- 1. ADD THE LIST LAYOUT
+local layout = Instance.new("UIListLayout")
+layout.Parent = mainFrame
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Padding = UDim.new(0, 8) -- THIS IS YOUR PADDING VALUE
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-local enterBtn = Instance.new("TextButton")
-enterBtn.Size = UDim2.new(0.8, 0, 0, 40)
-enterBtn.Position = UDim2.new(0.1, 0, 0.65, 0)
-enterBtn.Text = "CHECK KEY"
-enterBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 100)
-enterBtn.TextColor3 = Color3.new(1, 1, 1)
-enterBtn.Parent = keyFrame
+-- 2. ADD A PADDING OBJECT (So buttons don't touch the Title Bar)
+local guiPadding = Instance.new("UIPadding")
+guiPadding.Parent = mainFrame
+guiPadding.PaddingTop = UDim.new(0, 50) -- Keeps buttons below the Title Bar
+guiPadding.PaddingBottom = UDim.new(0, 10)
 
--- --- BUTTON CREATOR ---
-local function createButton(text, pos, color)
+-- --- SIMPLIFIED BUTTON CREATOR ---
+-- Now you only need the Text, the Color, and a LayoutOrder
+local function createButton(text, color, order)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.8, 0, 0, 35)
-    btn.Position = pos
+    btn.Name = text -- Easier to find in Explorer
+    btn.Size = UDim2.new(0.9, 0, 0, 35) -- 90% width of the frame
     btn.BackgroundColor3 = color
     btn.Text = text
     btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.Parent = mainFrame -- CRITICAL: Parented to mainFrame
+    btn.LayoutOrder = order or 0 -- Determines the vertical position
+    btn.Parent = mainFrame
+
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 6)
     corner.Parent = btn
+
     return btn
 end
+
+-- --- BUTTONS (No more UDim2 needed!) ---
+local speedBtn    = createButton("Speed: " .. settings.Speed, Color3.fromRGB(50, 50, 70), 1)
+local jumpBtn     = createButton("Inf Jump: OFF", Color3.fromRGB(50, 70, 50), 2)
+local keybindBtn  = createButton("Toggle Key: " .. settings.ToggleKey, Color3.fromRGB(70, 70, 50), 3)
+local aimBtn      = createButton("Aimbot: OFF", Color3.fromRGB(80, 50, 50), 4)
+local teamBtn     = createButton("Team Check: OFF", Color3.fromRGB(50, 50, 80), 5)
+local wallBtn     = createButton("Wall Check: OFF", Color3.fromRGB(60, 60, 60), 6)
+local dexBtn      = createButton("Open Dex", Color3.fromRGB(50, 50, 50), 7)
+local saveBtn     = createButton("SAVE PREFS", Color3.fromRGB(40, 40, 40), 8)
+local unloadBtn   = createButton("UNLOAD", Color3.fromRGB(100, 40, 40), 9)
 
 -- Create the Buttons inside the mainFrame
 local speedBtn = createButton("Speed: " .. settings.Speed, UDim2.new(0.1, 0, 0.12, 0), Color3.fromRGB(50, 50, 70))
