@@ -75,10 +75,21 @@ local function create(type, text, color, order, callback)
             if callback then callback(enabled) end
 
         elseif type == "int" then
-            -- This logic assumes you're cycling values (like 16 -> 100)
-            if callback then callback() end
-            -- Update text after callback finishes
-            btn.Text = text:gsub(":.*", "") .. ": " .. settings.Speed
+            container.PlaceholderText = "Enter Num..."
+            -- Handle when user finishes typing and presses Enter
+            container.FocusLost:Connect(function(enterPressed)
+                if enterPressed then
+                    local num = tonumber(container.Text)
+                    if num then
+                        if callback then callback(num) end
+                        container.Text = text:gsub(":.*", "") .. ": " .. num
+                    else
+                        container.Text = "Invalid Num!"
+                        task.wait(1)
+                        container.Text = text
+                    end
+                end
+            end)
 
         elseif type == "button" then
             if callback then callback() end
@@ -91,8 +102,8 @@ end
 -- --- YOUR CLEAN UI DEFINITION ---
 -- Note: 'text' here is the base name. The engine handles the ": ON/OFF" part.
 
-local speedBtn = create("int", "Speed: " .. settings.Speed, Color3.fromRGB(40, 40, 60), 1, function()
-    settings.Speed = (settings.Speed == 16) and 100 or 16
+local speedBtn = create("int", "Speed: " .. settings.Speed, Color3.fromRGB(40, 40, 60), 1, function(num)
+    settings.Speed = num
     if player.Character and player.Character:FindFirstChild("Humanoid") then
         player.Character.Humanoid.WalkSpeed = settings.Speed
     end
