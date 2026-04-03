@@ -52,24 +52,72 @@ title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 title.TextColor3 = Color3.new(1, 1, 1)
 
 -- --- BUTTON CREATOR ---
-local function createButton(text, color, order)
+-- --- THE CREATOR ENGINE ---
+local function create(type, text, color, order, callback)
     local btn = Instance.new("TextButton", mainFrame)
-    btn.Size = UDim2.new(0.9, 0, 0, 32)
+    btn.Size = UDim2.new(0.9, 0, 0, 35)
     btn.BackgroundColor3 = color
     btn.Text = text
-    btn.TextColor3 = Color3.new(1, 1, 1)
     btn.LayoutOrder = order
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 4)
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.SourceSansBold
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+
+    -- internal state for toggles
+    local enabled = false
+
+    btn.MouseButton1Click:Connect(function()
+        if type == "toggle" then
+            enabled = not enabled
+            btn.Text = text:gsub(":.*", "") .. ": " .. (enabled and "ON" or "OFF")
+            -- Visual feedback: glows brighter when ON
+            btn.BackgroundTransparency = enabled and 0 or 0.2
+            if callback then callback(enabled) end
+
+        elseif type == "int" then
+            -- This logic assumes you're cycling values (like 16 -> 100)
+            if callback then callback() end
+            -- Update text after callback finishes
+            btn.Text = text:gsub(":.*", "") .. ": " .. settings.Speed
+
+        elseif type == "button" then
+            if callback then callback() end
+        end
+    end)
+
     return btn
 end
 
--- BUTTON LIST
-local speedBtn  = createButton("Speed: " .. settings.Speed, Color3.fromRGB(40, 40, 60), 1)
-local aimBtn    = createButton("Aimbot: OFF", Color3.fromRGB(60, 40, 40), 2)
-local wallBtn   = createButton("Wall Check: OFF", Color3.fromRGB(50, 50, 50), 3)
-local saveBtn   = createButton("SAVE", Color3.fromRGB(30, 60, 30), 4)
-local unloadBtn = createButton("UNLOAD", Color3.fromRGB(80, 30, 30), 5)
+-- --- YOUR CLEAN UI DEFINITION ---
+-- Note: 'text' here is the base name. The engine handles the ": ON/OFF" part.
 
+local speedBtn = create("int", "Speed: " .. settings.Speed, Color3.fromRGB(40, 40, 60), 1, function()
+    settings.Speed = (settings.Speed == 16) and 100 or 16
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = settings.Speed
+    end
+end)
+
+local aimBtn = create("toggle", "Aimbot: OFF", Color3.fromRGB(60, 40, 40), 2, function(state)
+    aimbotEnabled = state
+end)
+
+local wallBtn = create("toggle", "Wall Check: OFF", Color3.fromRGB(50, 50, 50), 3, function(state)
+    wallCheckEnabled = state
+end)
+
+local teamBtn = create("toggle", "Team Check: OFF", Color3.fromRGB(40, 40, 70), 4, function(state)
+    teamCheckEnabled = state
+end)
+
+local saveBtn = create("button", "SAVE", Color3.fromRGB(30, 60, 30), 5, function()
+    saveSettings()
+    print("Settings Saved to " .. FileName)
+end)
+
+local unloadBtn = create("button", "UNLOAD", Color3.fromRGB(80, 30, 30), 6, function()
+    screenGui:Destroy()
+end)
 -- --- KEY SYSTEM ---
 local keyFrame = Instance.new("Frame", screenGui)
 keyFrame.Size = UDim2.new(0, 200, 0, 120)
